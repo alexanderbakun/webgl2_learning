@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Learning Webgl2</title>
+    <link rel="stylesheet" type="text/css" href="reset.css" />
+    <link rel="stylesheet" type="text/css" href="init.css" />
+  </head>
+  <body>
+    <canvas class="viewer"></canvas>
+    <script type="text/javascript">
+      var gui = window.require('nw.gui'),
+          win = gui.Window.get(),
+          timer,
+          isRunning = true;
+      
+      global.gui = gui;
+      global.win = win;
+      global.viewer = document.querySelector('.viewer');
+      global.document = document;
+      global.window = window;
+      
+      function main(timestamp)
+      {
+        if(isRunning)
+        {
+          
+          timer = requestAnimationFrame(main);
+        }
+        else
+        {
+          cancelAnimationFrame(timer);
+        }
+      }
+      
+      timer = requestAnimationFrame(main);
+    </script>
+  </body>
+</html>

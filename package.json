@@ -1,0 +1,27 @@
+{
+  "name": "webgl2_learning",
+  "version": "0.0.1",
+  "description": "learning the natives of webgl2",
+  "main": "init.html",
+  "window": {
+    "width": 1280,
+    "height": 720
+  },
+  "scripts": {
+    "start": "node_modules\\nw\\nwjs\\nw . --disable-devtools --disable-raf-throttling --enable-gpu-async-worker-context",
+    "debug": "node_modules\\nw\\nwjs\\nw . --disable-raf-throttling --enable-gpu-async-worker-context --enable-logging --remote-debugging-port=1729 --load-extension=.nwjs\\Extensions\\ShaderEditorExtension\\src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keleko34/webgl2_learning.git"
+  },
+  "author": "keleko34",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/keleko34/webgl2_learning/issues"
+  },
+  "homepage": "https://github.com/keleko34/webgl2_learning#readme",
+  "dependencies": {
+    "nw": "^0.26.3-sdk"
+  }
+}
