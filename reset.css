@@ -51,6 +51,10 @@ p, input, textarea {
   cursor:text;
 }
 
+canvas {
+  display: block;
+}
+
 /* remember to define visible focus styles!
 :focus {
 	outline: ?????;

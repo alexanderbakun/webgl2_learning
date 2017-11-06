@@ -1,4 +1,22 @@
 <!DOCTYPE html>
+<!-- IMPORTANT NOTES -->
+<!-- 
+     NWJS uses contexts for their threads,
+     
+     Front End Contexts:
+     --------------------
+      - <script>code</script>
+      - <script src="url"></script>
+     
+     Backend Contexts:
+     ------------------
+     - require(url);
+     
+     nw.gui allows access to the window to transform properties
+     
+     All UI will be in the DOM, while all mesh related items will be on the backend context
+     in webgl
+-->
 <html>
   <head>
     <title>Learning Webgl2</title>
@@ -6,33 +24,16 @@
     <link rel="stylesheet" type="text/css" href="init.css" />
   </head>
   <body>
-    <canvas class="viewer"></canvas>
-    <script type="text/javascript">
-      var gui = window.require('nw.gui'),
-          win = gui.Window.get(),
-          timer,
-          isRunning = true;
-      
-      global.gui = gui;
-      global.win = win;
-      global.viewer = document.querySelector('.viewer');
-      global.document = document;
-      global.window = window;
-      
-      function main(timestamp)
-      {
-        if(isRunning)
-        {
-          
-          timer = requestAnimationFrame(main);
-        }
-        else
-        {
-          cancelAnimationFrame(timer);
-        }
-      }
-      
-      timer = requestAnimationFrame(main);
-    </script>
+    <canvas class="viewer" width="1280" height="719" style="width:1280px;height:719px;"></canvas>
+    <!-- Globals -->
+    <script type="text/javascript" src="globals.js"></script>        
+    <!-- Main Engine -->
+    <script type="text/javascript" src="engine/engine.js"></script>
+    <!-- Keyboard/Mouse/Gaming Pad? -->
+    <script type="text/javascript" src="engine/input/input.js"></script>
+    <script type="text/javascript" src="engine/input/keyboard/keyboard.js"></script>
+    <script type="text/javascript" src="engine/input/mouse/mouse.js"></script>
+    
+    <script type="text/javascript" src="init.js"></script>
   </body>
 </html>
