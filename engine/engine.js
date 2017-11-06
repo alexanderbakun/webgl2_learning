@@ -2,16 +2,21 @@
 
 class engine {
   
-  static start() {
+  static start() 
+  {
     this.isRunning = true;
+    timer = requestAnimationFrame(main);
   }
   
-  static stop() {
+  static stop() 
+  {
     this.isRunning = false;
+    cancelAnimationFrame(timer);
   }
   
   static draw() {
     /* do some fancy stuff here */
+    this.input.update();
     this.playground();
     this.renderer.render();
   }

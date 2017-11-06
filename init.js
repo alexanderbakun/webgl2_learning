@@ -24,3 +24,8 @@ function resize()
 }
 
 window.addEventListener('resize',resize);
+
+engine.input.add('test','default',function(){console.log('pressed enter');},'enter',true)
+engine.input.add('reload','default',function(){console.log('pressed r');},'r')
+engine.input.add('copy','default',function(){console.log('pressed c + ctrl');},'c',false,true);
+engine.input.add('paste','default',function(){console.log('pressed v + ctrl');},'v',true,true);

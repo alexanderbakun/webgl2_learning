@@ -127,21 +127,19 @@ engine.input.keyboard = class keyboard {
   }
   
   static keyboardEventDown(e) {
-    if(this.listening) {
+    if(this.listening && !this.pressed[e.keyCode]) {
+      this.pressed[e.keyCode] = true;
       e.truekey = this.getKeyNameFromEvent(e);
-      this.pressed[e.keyCode] = e.truekey;
-      e.holding = true;
-      e.pressed = this.pressed;
+      e.pressed = true;
       this.onkeyevent(e);
     }
   }
   
   static keyboardEventUp(e) {
     if(this.listening) {
+      this.pressed.splice(1,e.keyCode);
       e.truekey = this.getKeyNameFromEvent(e);
-      this.pressed.splice(e.keyCode);
-      e.holding = false;
-      e.pressed = this.pressed;
+      e.pressed = false;
       this.onkeyevent(e);
     }
   }
