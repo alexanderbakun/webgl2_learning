@@ -14,54 +14,85 @@ engine.input = class input {
      - pressed
      - single
      - shift, ctrl, and alt secondaries
+     
+     mouse events:
+     - pressed
+     - single
+     - shift, ctrl, and alt secondaries
+     - double
    */
-  static keyboardEvent(e) 
+  static standardEvent(e)
   {
     const environment = this.environments[this.environment];
-    const title = environment.keyboard[e.keyCode];
+    let title = environment.inputs[e.keyCode];
     if(title !== undefined) 
     {
-      /* check if states match to add action to queue */
-      const action = environment.actions[title];
-      let chainable = true;
-      /* if this is a shift,control, or alt key ignore those booleans */
-        if([16,17,18].indexOf(e.keyCode) === -1 && (action.shift || action.ctrl || action.alt))
-        {
-          
-          if(chainable && action.shift) chainable = (e.shiftKey);
-          if(chainable && action.ctrl) chainable = (e.ctrlKey);
-          if(chainable && action.alt) chainable = (e.altKey);
-        }
+      function chainAction()
+      {
+        /* check if states match to add action to queue */
+        const action = environment.actions[title];
+        let chainable = true;
+        /* if this is a shift,control, or alt key ignore those booleans */
+          if([16,17,18].indexOf(e.keyCode) === -1)
+          {
+            if(chainable && (action.shift || e.shiftKey)) chainable = (e.shiftKey && action.shift);
+            if(chainable && (action.ctrl || e.ctrlKey)) chainable = (e.ctrlKey && action.ctrl);
+            if(chainable && (action.alt || e.altKey)) chainable = (e.altKey && action.alt);
+          }
+
+          if(chainable)
+          {
+            if(action.dblclick && e.keyCode < 4)
+            {
+              if(e.dblclick)
+              {
+                environment.event_chain_once[e.keyCode] = action.action;
+              }
+            }
+            else
+            {
+              /* this is a hold action */
+              if(action.pressed && e.pressed)
+              {
+                environment.event_chain[e.keyCode] = action.action;
+              }
+              /* single instance action */
+              else if(!action.pressed && !e.pressed)
+              {
+                environment.event_chain_once[e.keyCode] = action.action;
+              }
+              /* remove the event from the event chain */
+              else if(action.pressed && !e.pressed)
+              {
+                environment.event_chain[e.keyCode] = undefined;
+                delete environment.event_chain[e.keyCode];
+              }
+            }
+          }
+      }
       
-        if(chainable)
-        {
-          /* this is a hold action */
-          if(action.pressed && e.pressed)
-          {
-            environment.event_chain[e.keyCode] = action.action;
-          }
-          /* single instance action */
-          else if(!action.pressed && !e.pressed)
-          {
-            environment.event_chain_once[e.keyCode] = action.action;
-          }
-          /* remove the event from the event chain */
-          else if(action.pressed && !e.pressed)
-          {
-            environment.event_chain.splice(1,e.keyCode);
-          }
-        }
+      if(typeof title === 'object')
+      {
+        const items = title;
+        items.forEach(function(v){
+          title = v;
+          chainAction();
+        })
+      }
+      else
+      {
+        chainAction();
+      }
     }
   }
   
   /* mouse events:
-     - pressed
-     - single
-     - double
      - drag
      - drop
+     - scroll
    */
-  static mouseEvent(e) 
+  
+  static mouseEventUpdate(e)
   {
     
   }
@@ -72,7 +103,7 @@ engine.input = class input {
   }
   
   /* update fires all *hold* events per fps */
-  static update() 
+  static update()
   {
     const environment = this.environments[this.environment];
     
@@ -82,67 +113,47 @@ engine.input = class input {
     environment.event_chain_once = [];
   }
   
-  static add(title,environment,action,key,pressed,ctrl,alt,shift)
+  static add(title,environment,action,key,pressed,ctrl,alt,shift,dblclick)
   {
-    let keyPlaced = false,
-        type = '',
-        keyCode = 0;
-
-    if(typeof key === 'number') 
-    {
-      keyCode = key;
-      if(this.mouse.keys[key] !== undefined) 
-      {
-        keyPlaced = true;
-        type = 'mouse';
-        if(this.environments[environment] === undefined) this.clear(environment);
-        this.environments[environment].mouse[key] = title;
-      }
-      else if(this.keyboard.keys[key] !== undefined) 
-      {
-        keyPlaced = true;
-        type = 'keyboard';
-        if(this.environments[environment] === undefined) this.clear(environment);
-        this.environments[environment].keyboard[key] = title;
-      } 
-    }
-    else 
-    {
-      if(this.mouse.keys.indexOf(key) !== -1) 
-      {
-        keyCode = this.mouse.keys.indexOf(key);
-        keyPlaced = true;
-        type = 'mouse';
-        if(this.environments[environment] === undefined) this.clear(environment);
-        this.environments[environment].mouse[this.mouse.keys.indexOf(key)] = title;
-      }
-      else if(this.keyboard.keys.indexOf(key) !== -1) 
-      {
-        keyCode = this.keyboard.keys.indexOf(key);
-        keyPlaced = true;
-        type = 'keyboard';
-        if(this.environments[environment] === undefined) this.clear(environment);
-        this.environments[environment].keyboard[this.keyboard.keys.indexOf(key)] = title;
-      } 
-    }
+    let keys = this.keyboard.keys;
+    keys[0] = this.mouse.keys[0];
+    keys[1] = this.mouse.keys[1];
+    keys[2] = this.mouse.keys[2];
     
-    if(keyPlaced) 
+    const keyCode = (typeof key === 'number' ? (keys[key] !== undefined ? key : -1) : (keys.indexOf(key) !== -1 ? keys.indexOf(key) : -1));
+    
+    if(keyCode !== -1)
     {
+      if(this.environments[environment] === undefined) this.clear(environment);
+      switch(typeof this.environments[environment].inputs[keyCode])
+      {
+        case 'undefined':
+          this.environments[environment].inputs[keyCode] = title;
+        break;
+        case 'string':
+          this.environments[environment].inputs[keyCode] = [this.environments[environment].inputs[keyCode],title];
+        break;
+        case 'object':
+          this.environments[environment].inputs[keyCode].push(title);
+        break;
+      }
+      
       if(this.environments[environment].actions[title] !== undefined)
       {
         const action = this.environments[environment].actions[title];
 
-        this.environments[environment][action.type].splice(1,action.key);
+        this.environments[environment][action.type][action.key] = undefined;
+        delete this.environments[environment][action.type][action.key];
       }
       
       this.environments[environment].actions[title] = {
         action:action,
-        type:type,
         key:keyCode,
         pressed:!!pressed,
         ctrl:!!ctrl,
         alt:!!alt,
-        shift:!!shift
+        shift:!!shift,
+        dblclick:!!dblclick
       };
     }
     else
@@ -164,16 +175,28 @@ engine.input = class input {
     return this;
   }
   
-  static listen() 
+  static listenBind() 
   {
     this.inBindMode = true;
-    this.keyboard.toggleListening(false);
+    this.pause();
   }
   
-  static bind() 
+  static bind()
   {
     this.inBindMode = false;
+    this.resume();
+  }
+  
+  static pause()
+  {
+    this.keyboard.toggleListening(false);
+    this.mouse.toggleListening(false);
+  }
+  
+  static resume()
+  {
     this.keyboard.toggleListening(true);
+    this.mouse.toggleListening(true);
   }
   
   static clear(environment) 
@@ -206,8 +229,7 @@ engine.input.environments = {
       event_chain_once: [],
       event_chain: [],
       actions: {},
-      keyboard: [],
-      mouse: []
+      inputs: []
   }
 };
 engine.input.environment = 'default';

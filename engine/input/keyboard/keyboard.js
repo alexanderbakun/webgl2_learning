@@ -137,7 +137,8 @@ engine.input.keyboard = class keyboard {
   
   static keyboardEventUp(e) {
     if(this.listening) {
-      this.pressed.splice(1,e.keyCode);
+      this.pressed[e.keyCode] = undefined;
+      delete this.pressed[e.keyCode];
       e.truekey = this.getKeyNameFromEvent(e);
       e.pressed = false;
       this.onkeyevent(e);
@@ -148,7 +149,7 @@ engine.input.keyboard = class keyboard {
 engine.input.keyboard.listening = true;
 engine.input.keyboard.keys = engine.input.keyboard.default();
 engine.input.keyboard.pressed = [];
-engine.input.keyboard.onkeyevent = engine.input.keyboardEvent.bind(engine.input);
+engine.input.keyboard.onkeyevent = engine.input.standardEvent.bind(engine.input);
 
 window.addEventListener('keydown',engine.input.keyboard.keyboardEventDown.bind(engine.input.keyboard));
 window.addEventListener('keyup',engine.input.keyboard.keyboardEventUp.bind(engine.input.keyboard));
